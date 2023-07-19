@@ -197,7 +197,7 @@ The last line gives us , from where we will access.
 
 
 With the commands:
-  func –namespace default invoke …. that I was seeing in the browser but from a terminal
+func –namespace default invoke …. that I was seeing in the browser but from a terminal
 func –namespace default list … list of all functions within the namespace
 func –namespace default info …. information
 func –namespace default delete … delete
