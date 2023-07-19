@@ -1,0 +1,93 @@
+**### Installing Knative Serving using YAML files**
+
+Ιnstall Knative Serving by applying YAML files using the kubectl CLI.
+
+**Prerequisites**
+
+- You have installed the [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
+- You have a cluster that uses Kubernetes v1.24
+- Your Kubernetes cluster must have access to the internet
+
+
+**Verifying image signatures**
+
+1. Install [cosign](https://docs.sigstore.dev/cosign/installation/) and [jq](https://lindevs.com/install-jq-on-ubuntu).
+
+For cosign:
+
+![image](https://github.com/nubificus/roadmap/assets/72733593/aebfdeaa-054f-4d76-9a86-a3a0298422e1)
+
+For jq: 
+
+![image](https://github.com/nubificus/roadmap/assets/72733593/153f0723-fd87-437f-8883-3abf151c35bb)
+
+2. Extract the images from a manifeset and verify the signatures. 
+
+`curl -sSL https://github.com/knative/serving/releases/download/knative-v1.10.1/serving-core.yaml \
+  | grep 'gcr.io/' | awk '{print $2}' | sort | uniq \
+  | xargs -n 1 \
+    cosign verify -o text \
+      --certificate-identity=signer@knative-releases.iam.gserviceaccount.com \
+      --certificate-oidc-issuer=https://accounts.google.com
+`
+
+![image](https://github.com/nubificus/roadmap/assets/72733593/f1a8c815-e7bb-47b9-96e8-3f297b45aef0)
+
+**### Install the Knative Serving component**
+
+1. Install the required custom resources by running the command:
+
+`kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.10.2/serving-crds.yaml
+`
+
+![image](https://github.com/nubificus/roadmap/assets/72733593/5cd0248a-4577-4dc5-8de0-af0d6c3a8d9b)
+
+
+2. Install the core components of Knative Serving 
+
+`kubectl apply -f https://github.com/knative/serving/releases/download/knative-v1.10.2/serving-core.yaml
+`
+
+![image](https://github.com/nubificus/roadmap/assets/72733593/d06c2a45-ff7a-4c22-89ef-48ae2e5610ed)
+
+
+**### Install a networking layer**
+
+The following instructions are for installing a networking layer. ( install Kourier and enable its Knative integration)
+
+1. Install the Knative Kourier controller : 
+
+`kubectl apply -f https://github.com/knative/net-kourier/releases/download/knative-v1.10.0/kourier.yaml
+`
+
+2. Configure Knative Serving to use Kourier by default:
+
+kubectl patch configmap/config-network \
+  --namespace knative-serving \
+  --type merge \
+  --patch '{"data":{"ingress-class":"kourier.ingress.networking.knative.dev"}}'
+
+
+3. Fetch the CNAME by running the command: 
+
+`kubectl --namespace kourier-system get service kourier
+` 
+
+
+![image](https://github.com/nubificus/roadmap/assets/72733593/ac49a770-1cc2-40aa-a53e-f97c76c88970)
+
+![image](https://github.com/nubificus/roadmap/assets/72733593/70b240fa-49a6-4589-9eb0-6cb95013921d)
+
+
+**### Verify the installation**
+
+verify the installation with the  command:
+
+`kubectl get pods -n knative-serving`
+
+![image](https://github.com/nubificus/roadmap/assets/72733593/3186659f-b69a-484b-8ce5-b4c0beda8e19)
+
+
+
+
+
